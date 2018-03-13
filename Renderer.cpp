@@ -4,6 +4,8 @@
 #include "GDIHelper.h"
 #include "Renderer.h"
 
+#include "Vector.h"
+
 bool IsInRange(int x, int y);
 void PutPixel(int x, int y);
 
@@ -21,15 +23,19 @@ void PutPixel(int x, int y)
 	*(dest + offset) = g_CurrentColor;
 }
 
-void DrawCircle(int cen_pox_x, int cen_pox_y, float radius)
+void DrawCircle(Vector2 cen_pos, float radius)
 {
 	int nradius = (int)radius;
 
-	for (int x = cen_pox_x - nradius; x < cen_pox_x + nradius; x++)
+	Vector2 checkPixel_pos;
+
+	for (int x = cen_pos.X - nradius; x < cen_pos.X + nradius; x++)
 	{
-		for (int y = cen_pox_y - nradius; y < cen_pox_y + nradius; y++)
+		for (int y = cen_pos.Y - nradius; y < cen_pos.Y + nradius; y++)
 		{
-			if (sqrt(pow(cen_pox_x - x, 2) + pow(cen_pox_y - y, 2)) < radius)
+			checkPixel_pos = Vector2(x, y);
+
+			if (Vector2::Dist( cen_pos, checkPixel_pos ) < radius)
 				PutPixel(x, y);
 		}
 	}
@@ -41,10 +47,11 @@ void UpdateFrame(void)
 	SetColor(32, 128, 255);
 	Clear();
 
+	Vector2 circle_Pos(0, 0);
+
 	// Draw
 	SetColor(255, 0, 0);
-	DrawCircle(100, 40, 60.0f);
-	
+	DrawCircle(circle_Pos, 60.0f);
 
 	// Buffer Swap 
 	BufferSwap();
