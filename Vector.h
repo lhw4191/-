@@ -15,4 +15,5 @@ public:
 
 	static float Dist(const Vector2 &V1, const Vector2 &V2);
 	static float DistSquared(const Vector2 &V1, const Vector2 &V2);
+	Vector2 operator *(const Matrix2 Mat) const;
 };
