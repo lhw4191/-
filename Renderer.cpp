@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "Vector.h"
+#include "Triangle.h"
 #include "SoftRenderer.h"
 #include "GDIHelper.h"
 #include "Renderer.h"
@@ -38,12 +39,17 @@ void DrawLine(const Vector3& start, const Vector3& end)
 
 }
 
-void Draw2DTriangle(const Vector3& v1, const Vector3& v2, const Vector3& v3)
+void Draw2DTriangle(Triangle& triangle, const Matrix3& mt)
 {
 	float xMin, yMin;
 	float xMax, yMax;
 	xMin = yMin = INFINITY;
 	xMax = yMax = -INFINITY;
+
+	Vector3 v1, v2, v3;
+	v1 = triangle.vertices[0].position * mt;
+	v2 = triangle.vertices[1].position * mt;
+	v3 = triangle.vertices[2].position * mt;
 
 	if (v1.X < xMin) xMin = v1.X;
 	if (v2.X < xMin) xMin = v2.X;
@@ -58,27 +64,12 @@ void Draw2DTriangle(const Vector3& v1, const Vector3& v2, const Vector3& v3)
 	if (v2.Y > yMax) yMax = v2.Y;
 	if (v3.Y > yMax) yMax = v3.Y;
 
-	Vector2 u = (v2 - v1).ToVector2();
-	Vector2 v = (v3 - v1).ToVector2();
-	float dotUU = u.Dot(u);
-	float dotUV = u.Dot(v);
-	float dotVV = v.Dot(v);
-	float invDenom = 1.0f / (dotUU * dotVV - dotUV * dotUV);
-
 	for (int y = RoundToInt(yMin); y < RoundToInt(yMax); y++)
 	{
 		for (int x = RoundToInt(xMin); x < RoundToInt(xMax); x++)
 		{
-			Vector2 w = (Vector3((float)x, (float)y, 0.0f) - v1).ToVector2();
-			float dotUW = u.Dot(w);
-			float dotVW = v.Dot(w);
-			float outS = (dotVV * dotUW - dotUV * dotVW) * invDenom;
-			float outT = (dotUU * dotVW - dotUV * dotUW) * invDenom;
-			if (outS < 0.0f) continue;
-			if (outT < 0.0f) continue;
-			if (outS + outT > 1.0f) continue;
-
-			PutPixel(IntPoint(x, y));
+			if(triangle.IsInTriangle(x, y, mt))
+				PutPixel(IntPoint(x, y));
 		}
 	}
 }
@@ -87,11 +78,11 @@ void Draw2DTriangle(const Vector3& v1, const Vector3& v2, const Vector3& v3)
 void UpdateFrame(void)
 {
 	// Buffer Clear
-	SetColor(32, 128, 255);
+	SetColor(50, 50, 50);
 	Clear();
 
 	// Draw
-	Vector3 Pt1, Pt2, Pt3;
+	Triangle triangle;
 
 	static float offsetX = 0.0f;
 	//static float offsetY = 0.0f;
@@ -111,12 +102,13 @@ void UpdateFrame(void)
 	SMat.SetScale(scale);
 	Matrix3 TRSMat = TMat * RMat * SMat;
 
-	Pt1.SetPoint(0.0f, 0.0f);
-	Pt2.SetPoint(160.0f, 160.0f);
-	Pt3.SetPoint(-20.0f, 160.0f);
+	// Triangle Vertex Setting
+	triangle.vertices[0].position.SetPoint(0.0f, 0.0f);
+	triangle.vertices[1].position.SetPoint(160.0f, 160.0f);
+	triangle.vertices[2].position.SetPoint(-20.0f, 160.0f);
 
 	SetColor(255, 0, 0);
-	Draw2DTriangle(Pt1 * TRSMat, Pt2 * TRSMat, Pt3 * TRSMat);
+	Draw2DTriangle(triangle, TRSMat);
 
 	// Buffer Swap 
 	BufferSwap();

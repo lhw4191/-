@@ -5,8 +5,9 @@
 
 struct Vertex
 {
-public :
-	Vertex() { };
+public:
+	Vertex() {}
+	Vertex(Vector3 v, ULONG c) : position(v), color(c) {}
 	Vector3 position;
 	ULONG color;
 };
@@ -14,11 +15,9 @@ public :
 struct Triangle
 {
 public:
-	Triangle() {};
+	Triangle() {}
+	Vertex vertices[3];
 
-	Vector3 vertices[3];
-	bool isInTriangle() { return false; }
-
-	// Renderer에서 점 찍는 것을 삼각형으로 관리하여 그리게 작성
+	bool IsInTriangle(int x, int y, const Matrix3& mt);
 };
 
