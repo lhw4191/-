@@ -2,16 +2,7 @@
 
 #include "stdafx.h"
 #include "Vector.h"
-
-struct Vertex
-{
-public:
-	Vertex() {}
-	Vertex(Vector3 v) { position = v; }
-	Vector3 position;
-	ULONG color;
-	Vector2 uv;
-};
+#include "Vertex.h"
 
 struct Triangle
 {
@@ -72,26 +63,6 @@ public:
 		if (t < 0.0f) return false;
 		if (s + t > 1.0f) return false;
 		return true;
-	}
-
-	ULONG GetPixelColor(Vector3 target, float s, float t)
-	{
-		BYTE RV0 = GetRValue(vt[0].color);
-		BYTE RV1 = GetRValue(vt[1].color);
-		BYTE RV2 = GetRValue(vt[2].color);
-
-		BYTE GV0 = GetGValue(vt[0].color);
-		BYTE GV1 = GetGValue(vt[1].color);
-		BYTE GV2 = GetGValue(vt[2].color);
-
-		BYTE BV0 = GetBValue(vt[0].color);
-		BYTE BV1 = GetBValue(vt[1].color);
-		BYTE BV2 = GetBValue(vt[2].color);
-
-		BYTE FinalR = RoundToInt(RV0 * (1.0f - s - t) + RV1 * s + RV2 * t);
-		BYTE FinalG = RoundToInt(GV0 * (1.0f - s - t) + GV1 * s + GV2 * t);
-		BYTE FinalB = RoundToInt(BV0 * (1.0f - s - t) + BV1 * s + BV2 * t);
-		return RGB32(FinalR, FinalG, FinalB);
 	}
 
 };

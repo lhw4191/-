@@ -1,4 +1,3 @@
-
 #include "stdafx.h"
 #include "Vector.h"
 #include "SoftRenderer.h"
@@ -7,6 +6,10 @@
 #include "Triangle.h"
 #include "Texture.h"
 #include "Mesh.h"
+#include "Material.h"
+
+#include <algorithm>
+using namespace std;
 
 bool IsInRange(int x, int y)
 {
@@ -41,58 +44,77 @@ void DrawLine(const Vector3& start, const Vector3& end)
 	}
 }
 
-void Draw2DTriangle(Triangle t)
-{
-	for (int y = t.Min.Y; y <= t.Max.Y; y++)
-	{
-		for (int x = t.Min.X; x <= t.Max.X; x++)
-		{
-			Vector3 target((float)x + 0.5f, (float)y + 0.5f, 0.0f);
-			float outS, outT;
-			t.CalcBaryCentricCoord(target, &outS, &outT);
-			if (t.IsInTrianble(outS, outT))
-			{
-				if (g_Texture->IsLoaded())
-				{
-					g_CurrentColor = g_Texture->GetTexturePixel(outS, outT, t);
-				}
-				else
-				{
-					g_CurrentColor = t.GetPixelColor(target, outS, outT);
-				}
+Mesh mesh;
 
-				PutPixel(IntPoint(x, y));
-			}			
-		}
-	}
-}
-void Draw2DMesh(Mesh mesh)
-{
-	for (int i = 0; i < mesh.triangleCount; i++)
-	{
-		for (int y = mesh.triangle[i].Min.Y; y <= mesh.triangle[i].Max.Y; y++)
-		{
-			for (int x = mesh.triangle[i].Min.X; x <= mesh.triangle[i].Max.X; x++)
-			{
-				Vector3 target((float)x + 0.5f, (float)y + 0.5f, 0.0f);
-				float outS, outT;
-				mesh.triangle[i].CalcBaryCentricCoord(target, &outS, &outT);
-				if (mesh.triangle[i].IsInTrianble(outS, outT))
-				{
-					if (g_Texture->IsLoaded())
-					{
-						g_CurrentColor = g_Texture->GetTexturePixel(outS, outT, mesh.triangle[i]);
-					}
-					else
-					{
-						g_CurrentColor = mesh.triangle[i].GetPixelColor(target, outS, outT);
-					}
+Texture* steveTexture;
+Texture* creeperTexture;
+Material steveMaterial;
+Material creeperMaterial;
+Material** materials;
+int materialSize;
 
-					PutPixel(IntPoint(x, y));
-				}
-			}
-		}
-	}
+void InitFrame(void)
+{
+	int vertexSize, indexSize;
+	// 텍스쳐 초기화
+	steveTexture = new Texture();
+	steveTexture->LoadBMP("test.bmp");
+	creeperTexture = new Texture();
+	creeperTexture->LoadBMP("creeper.bmp");
+
+	// 메테리얼 초기화
+	steveMaterial.drawLayer = 0;
+	steveMaterial.SetTexture(steveTexture);
+	creeperMaterial.drawLayer = 1;
+	creeperMaterial.SetTexture(creeperTexture);
+
+	materialSize = 2;
+	materials = new Material*[materialSize];
+	materials[0] = &steveMaterial;
+	materials[1] = &creeperMaterial;
+
+	std::sort(materials, materials+ materialSize, Material::comp);
+
+	// 메쉬 초기화
+	// 점 생성
+	Vector3 p1, p2, p3, p4;
+	
+	p1.SetPoint(-50.0f, 50.0f);  // 왼위
+	p2.SetPoint(50.0f, 50.0f);   // 오위
+	p3.SetPoint(50.0f, -50.0f);  // 오아래
+	p4.SetPoint(-50.0f, -50.0f); // 왼아래
+	
+	vertexSize = 4;
+	indexSize = 6;
+
+	// Vertex
+	mesh.vertexSize = vertexSize;
+	mesh.vertices = new Vertex[vertexSize];
+	mesh.vertices[0].position = p1;// 왼위
+	mesh.vertices[0].uv = Vector2(0.125f, 0.125f);
+	mesh.vertices[0].color = RGB(255, 255, 255);
+
+	mesh.vertices[1].position = p2;// 오위
+	mesh.vertices[1].uv = Vector2(0.25f, 0.125f);
+	mesh.vertices[1].color = RGB(255, 255, 255);
+
+	mesh.vertices[2].position = p3;// 오아래
+	mesh.vertices[2].uv = Vector2(0.25f, 0.25f);
+	mesh.vertices[2].color = RGB(255, 255, 255);
+
+	mesh.vertices[3].position = p4;// 왼아래
+	mesh.vertices[3].uv = Vector2(0.125f, 0.25f);
+	mesh.vertices[3].color = RGB(255, 255, 255);
+
+	// Index
+	mesh.indexSize = indexSize;
+	mesh.indices = new unsigned int[indexSize];
+	mesh.indices[0] = 0;
+	mesh.indices[1] = 1;
+	mesh.indices[2] = 2;
+	mesh.indices[3] = 2;
+	mesh.indices[4] = 3;
+	mesh.indices[5] = 0;
 }
 
 void UpdateFrame(void)
@@ -100,10 +122,6 @@ void UpdateFrame(void)
 	// Buffer Clear
 	SetColor(32, 128, 255);
 	Clear();
-
-	// Draw
-	Vector3 Pt1, Pt2, Pt3, Pt4, Pt5, Pt6;
-	Mesh mesh;
 
 	static float offsetX = 0.0f;
 	static float angle = 0.0f;
@@ -122,46 +140,12 @@ void UpdateFrame(void)
 	SMat.SetScale(scale);
 	Matrix3 TRSMat = TMat * RMat * SMat;
 
-	// 점 생성
-	Pt1.SetPoint(-150, 150.0f); // 왼위
-	Pt2.SetPoint(150.0f, 150.0f); // 오위
-	Pt3.SetPoint(150.0f, -150.0f); // 오아래
-	Pt4.SetPoint(-150.0f, -150.0f); // 왼아래
+	steveMaterial.SetMatrix(TRSMat);
 
-	// 정점 배열 생성
-	int vertexCount = 6;
-	mesh.vertex = new Vertex[vertexCount];
-
-	// 정점 배열 설정
-	mesh.vertex[0] = Vertex(Pt1 * TRSMat);
-	mesh.vertex[0].color = RGB32(255, 0, 0);
-	mesh.vertex[0].uv = Vector2(0.0f, 0.0f);
-
-	mesh.vertex[1] = Vertex(Pt2 * TRSMat);
-	mesh.vertex[1].color = RGB32(0, 255, 0);
-	mesh.vertex[1].uv = Vector2(1.0f, 0.0f);
-
-	mesh.vertex[2] = Vertex(Pt3 * TRSMat);
-	mesh.vertex[2].color = RGB32(0, 0, 255);
-	mesh.vertex[2].uv = Vector2(1.0f, 1.0f);
-
-	mesh.vertex[3] = Vertex(Pt1 * TRSMat);
-	mesh.vertex[3].color = RGB32(128, 128, 0);
-	mesh.vertex[3].uv = Vector2(0.0f, 0.0f);
-
-	mesh.vertex[4] = Vertex(Pt3 * TRSMat);
-	mesh.vertex[4].color = RGB32(0, 128, 128);
-	mesh.vertex[4].uv = Vector2(1.0f, 1.0f);
-
-	mesh.vertex[5] = Vertex(Pt4 * TRSMat);
-	mesh.vertex[5].color = RGB32(128, 0, 128);
-	mesh.vertex[5].uv = Vector2(0.0f, 1.0f);
-
-	// 정점 배열 데이터를 이용하여 삼각형 배열 생성
-	mesh.CreateTriangle(vertexCount);
-
-	// 그리기
-	Draw2DMesh(mesh);
+	for (int i = 0; i < materialSize; i++)
+	{
+		materials[i]->Render(&mesh);
+	}
 
 	// Buffer Swap 
 	BufferSwap();

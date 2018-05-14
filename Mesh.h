@@ -7,9 +7,8 @@ struct Mesh
 public:
 	Mesh();
 
-	Vertex* vertex = 0;
-	Triangle* triangle = 0;
-
-	int triangleCount;
-	void CreateTriangle(int vertexCount);
+	int vertexSize;
+	int indexSize;
+	Vertex* vertices = 0;
+	unsigned int* indices;
 };
