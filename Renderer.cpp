@@ -6,7 +6,7 @@
 #include "Triangle.h"
 #include "Texture.h"
 #include "Mesh.h"
-#include "Material.h"
+#include "Sprite.h"
 
 #include <algorithm>
 using namespace std;
@@ -48,10 +48,10 @@ Mesh mesh;
 
 Texture* steveTexture;
 Texture* creeperTexture;
-Material steveMaterial;
-Material creeperMaterial;
-Material** materials;
-int materialSize;
+Sprite steveSprite;
+Sprite creeperSprite;
+Sprite** sprites;
+int spritesSize;
 
 void InitFrame(void)
 {
@@ -63,17 +63,17 @@ void InitFrame(void)
 	creeperTexture->LoadBMP("creeper.bmp");
 
 	// 메테리얼 초기화
-	steveMaterial.drawLayer = 0;
-	steveMaterial.SetTexture(steveTexture);
-	creeperMaterial.drawLayer = 1;
-	creeperMaterial.SetTexture(creeperTexture);
+	steveSprite.drawLayer = 0;
+	steveSprite.SetTexture(steveTexture);
+	creeperSprite.drawLayer = 1;
+	creeperSprite.SetTexture(creeperTexture);
 
-	materialSize = 2;
-	materials = new Material*[materialSize];
-	materials[0] = &steveMaterial;
-	materials[1] = &creeperMaterial;
+	spritesSize = 2;
+	sprites = new Sprite*[spritesSize];
+	sprites[0] = &steveSprite;
+	sprites[1] = &creeperSprite;
 
-	std::sort(materials, materials+ materialSize, Material::comp);
+	std::sort(sprites, sprites + spritesSize, Sprite::comp);
 
 	// 메쉬 초기화
 	// 점 생성
@@ -134,17 +134,29 @@ void UpdateFrame(void)
 	if (GetAsyncKeyState(VK_PRIOR)) scale *= 1.01f;
 	if (GetAsyncKeyState(VK_NEXT)) scale *= 0.99f;
 
+	// 레이어 테스트
+	if (GetAsyncKeyState(VK_NUMPAD1))
+	{
+		steveSprite.drawLayer = 0;
+		std::sort(sprites, sprites + spritesSize, Sprite::comp);
+	}
+	if (GetAsyncKeyState(VK_NUMPAD2))
+	{
+		steveSprite.drawLayer = 2;
+		std::sort(sprites, sprites + spritesSize, Sprite::comp);
+	}
+
 	Matrix3 TMat, RMat, SMat;
 	TMat.SetTranslation(offsetX, 0.0f);
 	RMat.SetRotation(angle);
 	SMat.SetScale(scale);
 	Matrix3 TRSMat = TMat * RMat * SMat;
 
-	steveMaterial.SetMatrix(TRSMat);
+	steveSprite.SetMatrix(TRSMat);
 
-	for (int i = 0; i < materialSize; i++)
+	for (int i = 0; i < spritesSize; i++)
 	{
-		materials[i]->Render(&mesh);
+		sprites[i]->Render(&mesh);
 	}
 
 	// Buffer Swap 
