@@ -8,25 +8,46 @@ class Sprite
 {
 private:
 	TextureShader * shader;
+	int drawLayer;
 
 public:
-	Sprite() { shader = new TextureShader; }
+	Vector2 position;
+	float angle;
+	float scale;
+	
+	Sprite() {
+		shader = new TextureShader; 
+		position = Vector2();
+		angle = 0;
+		scale = 1.0f;
+		drawLayer = 0;
+	}
 
-	int drawLayer;
+	void Init(Vector2 position, float angle, float scale, int layer) {
+		this->position = position;
+		this->angle = angle;
+		this->scale = scale;
+		this->drawLayer = layer;
+	}
 
 	void Render(Mesh* mesh)
 	{
 		shader->Render(mesh);
 	}
-	void SetMatrix(Matrix3 matrix)
+
+	void SetDrawLayer(int layer)
 	{
-		shader->SetWorldMatrix(matrix);
+		this->drawLayer = layer;
+	}
+	void SetMatrix(Matrix3 worldMatrix, Matrix3 viewMatrix)
+	{
+		shader->SetMatrix(worldMatrix, viewMatrix);
 	}
 	void SetTexture(Texture* texture)
 	{
 		shader->SetTexture(texture);
 	}
-
+	
 	static bool comp(const Sprite* a, const Sprite* b)
 	{
 		return (a->drawLayer > b->drawLayer);

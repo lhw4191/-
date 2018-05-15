@@ -24,6 +24,9 @@ class TextureShader
 {
 private :
 	Matrix3 worldMatrix;
+	Matrix3 viewMatrix;
+	Matrix3 projectionMatrix;
+
 	Texture* texture;
 
 	vOutput VShader(vInput input);
@@ -37,5 +40,5 @@ public :
 
 	void Render(Mesh* mesh);
 	void SetTexture(Texture* texture);
-	void SetWorldMatrix(Matrix3 worldMatrix);
+	void SetMatrix(Matrix3 worldMatrix, Matrix3 viewMatrix);
 };

@@ -6,6 +6,7 @@ vOutput TextureShader::VShader(vInput input)
 	vOutput output;
 
 	output.position = input.position * worldMatrix;
+	output.position = output.position * viewMatrix;
 	output.tex = input.tex;
 
 	return output;
@@ -65,7 +66,8 @@ void TextureShader::SetTexture(Texture* texture)
 {
 	this->texture = texture;
 }
-void TextureShader::SetWorldMatrix(Matrix3 worldMatrix)
+void TextureShader::SetMatrix(Matrix3 worldMatrix, Matrix3 viewMatrix)
 {
 	this->worldMatrix = worldMatrix;
+	this->viewMatrix = viewMatrix;
 }

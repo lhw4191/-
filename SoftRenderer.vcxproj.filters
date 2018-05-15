@@ -81,6 +81,9 @@
     <ClInclude Include="Sprite.h">
       <Filter>Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Transform2D.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

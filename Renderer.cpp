@@ -7,6 +7,7 @@
 #include "Texture.h"
 #include "Mesh.h"
 #include "Sprite.h"
+#include "Transform2D.h"
 
 #include <algorithm>
 using namespace std;
@@ -63,9 +64,9 @@ void InitFrame(void)
 	creeperTexture->LoadBMP("creeper.bmp");
 
 	// 메테리얼 초기화
-	steveSprite.drawLayer = 0;
+	steveSprite.SetDrawLayer(0);
 	steveSprite.SetTexture(steveTexture);
-	creeperSprite.drawLayer = 1;
+	creeperSprite.SetDrawLayer(1);
 	creeperSprite.SetTexture(creeperTexture);
 
 	spritesSize = 2;
@@ -123,39 +124,52 @@ void UpdateFrame(void)
 	SetColor(32, 128, 255);
 	Clear();
 
-	static float offsetX = 0.0f;
-	static float angle = 0.0f;
-	static float scale = 1.0f;
+	static Vector2 cameraOffset;
+	static float cameraAngle;
 
-	if (GetAsyncKeyState(VK_LEFT)) offsetX -= 1.0f;
-	if (GetAsyncKeyState(VK_RIGHT)) offsetX += 1.0f;
-	if (GetAsyncKeyState(VK_UP)) angle += 1.0f;
-	if (GetAsyncKeyState(VK_DOWN)) angle -= 1.0f;
-	if (GetAsyncKeyState(VK_PRIOR)) scale *= 1.01f;
-	if (GetAsyncKeyState(VK_NEXT)) scale *= 0.99f;
-
+	if (GetAsyncKeyState(VK_LSHIFT))
+	{
+		if (GetAsyncKeyState(VK_LEFT)) cameraOffset.X -= 1.0f;
+		if (GetAsyncKeyState(VK_RIGHT)) cameraOffset.X += 1.0f;
+		if (GetAsyncKeyState(VK_UP)) cameraOffset.Y += 1.0f;
+		if (GetAsyncKeyState(VK_DOWN)) cameraOffset.Y -= 1.0f;
+		if (GetAsyncKeyState(VK_PRIOR)) cameraAngle += 1.0f;
+		if (GetAsyncKeyState(VK_NEXT)) cameraAngle -= 1.0f;
+	}
+	else
+	{
+		if (GetAsyncKeyState(VK_LEFT)) steveSprite.position.X -= 1.0f;
+		if (GetAsyncKeyState(VK_RIGHT)) steveSprite.position.X += 1.0f;
+		if (GetAsyncKeyState(VK_UP)) steveSprite.angle += 1.0f;
+		if (GetAsyncKeyState(VK_DOWN)) steveSprite.angle -= 1.0f;
+		if (GetAsyncKeyState(VK_PRIOR)) steveSprite.scale *= 1.01f;
+		if (GetAsyncKeyState(VK_NEXT)) steveSprite.scale *= 0.99f;
+	}
+	
 	// 레이어 테스트
 	if (GetAsyncKeyState(VK_NUMPAD1))
 	{
-		steveSprite.drawLayer = 0;
+		steveSprite.SetDrawLayer(0);
 		std::sort(sprites, sprites + spritesSize, Sprite::comp);
 	}
 	if (GetAsyncKeyState(VK_NUMPAD2))
 	{
-		steveSprite.drawLayer = 2;
+		steveSprite.SetDrawLayer(2);
 		std::sort(sprites, sprites + spritesSize, Sprite::comp);
 	}
 
-	Matrix3 TMat, RMat, SMat;
-	TMat.SetTranslation(offsetX, 0.0f);
-	RMat.SetRotation(angle);
-	SMat.SetScale(scale);
-	Matrix3 TRSMat = TMat * RMat * SMat;
+	Transform2D QuadTransform;
+	Matrix3 TRSMat;
 
-	steveSprite.SetMatrix(TRSMat);
+	Transform2D CameraTransform(cameraOffset, cameraAngle, 1.0f);
+	Matrix3 ViewMat = CameraTransform.GetViewMatrix();
 
 	for (int i = 0; i < spritesSize; i++)
 	{
+		QuadTransform.SetTrasform(sprites[i]->position, sprites[i]->angle, sprites[i]->scale);
+		TRSMat = QuadTransform.GetTRSMatrix();
+
+		sprites[i]->SetMatrix(TRSMat, ViewMat);
 		sprites[i]->Render(&mesh);
 	}
 
