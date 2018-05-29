@@ -138,12 +138,12 @@ void UpdateFrame(void)
 	}
 	else
 	{
-		if (GetAsyncKeyState(VK_LEFT)) steveSprite.position.X -= 1.0f;
-		if (GetAsyncKeyState(VK_RIGHT)) steveSprite.position.X += 1.0f;
-		if (GetAsyncKeyState(VK_UP)) steveSprite.angle += 1.0f;
-		if (GetAsyncKeyState(VK_DOWN)) steveSprite.angle -= 1.0f;
-		if (GetAsyncKeyState(VK_PRIOR)) steveSprite.scale *= 1.01f;
-		if (GetAsyncKeyState(VK_NEXT)) steveSprite.scale *= 0.99f;
+		if (GetAsyncKeyState(VK_LEFT)) steveSprite.transform.Location.X -= 1.0f;
+		if (GetAsyncKeyState(VK_RIGHT)) steveSprite.transform.Location.X += 1.0f;
+		if (GetAsyncKeyState(VK_UP)) steveSprite.transform.Rotation += 1.0f;
+		if (GetAsyncKeyState(VK_DOWN)) steveSprite.transform.Rotation -= 1.0f;
+		if (GetAsyncKeyState(VK_PRIOR)) steveSprite.transform.Scale *= 1.01f;
+		if (GetAsyncKeyState(VK_NEXT)) steveSprite.transform.Scale *= 0.99f;
 	}
 	
 	// Layer Swap Test
@@ -190,8 +190,7 @@ void UpdateFrame(void)
 
 	for (int i = 0; i < spritesSize; i++)
 	{
-		QuadTransform.SetTrasform(sprites[i]->position, sprites[i]->angle, sprites[i]->scale);
-		TRSMat = QuadTransform.GetTRSMatrix();
+		TRSMat = sprites[i]->transform.GetTRSMatrix();
 
 		sprites[i]->SetMatrix(TRSMat, ViewMat);
 		sprites[i]->Render(&mesh);

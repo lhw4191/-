@@ -3,6 +3,7 @@
 #include "Mesh.h"
 #include "Texture.h"
 #include "TextureShader.h"
+#include "Transform2D.h"
 
 class Sprite
 {
@@ -11,22 +12,16 @@ private:
 	int drawLayer;
 
 public:
-	Vector2 position;
-	float angle;
-	float scale;
+	Transform2D transform;
 	
 	Sprite() {
 		shader = new TextureShader; 
-		position = Vector2();
-		angle = 0;
-		scale = 1.0f;
+		transform.SetTrasform(Vector2(), 0.0f, 1.0f);
 		drawLayer = 0;
 	}
 
-	void Init(Vector2 position, float angle, float scale, int layer) {
-		this->position = position;
-		this->angle = angle;
-		this->scale = scale;
+	void Init(Transform2D transform, int layer) {
+		this->transform = transform;
 		this->drawLayer = layer;
 	}
 
