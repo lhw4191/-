@@ -106,4 +106,5 @@ public:
 	Vector3 operator+(const Vector3& V) const;
 	Vector3 operator-(const Vector3& V) const;
 	Vector3 operator *(const Matrix3 Mat) const;
+	Vector3 operator *=(const Matrix3 Mat) const;
 };

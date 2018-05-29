@@ -81,3 +81,12 @@ Vector3 Vector3::operator*(Matrix3 Mat) const
 	result.Z = X * Mat._31 + Y * Mat._32 + Z * Mat._33;
 	return result;
 }
+
+Vector3 Vector3::operator*=(const Matrix3 Mat) const
+{
+	Vector3 result;
+	result.X = X * Mat._11 + Y * Mat._12 + Z * Mat._13;
+	result.Y = X * Mat._21 + Y * Mat._22 + Z * Mat._23;
+	result.Z = X * Mat._31 + Y * Mat._32 + Z * Mat._33;
+	return result;
+}

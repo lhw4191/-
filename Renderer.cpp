@@ -146,7 +146,7 @@ void UpdateFrame(void)
 		if (GetAsyncKeyState(VK_NEXT)) steveSprite.scale *= 0.99f;
 	}
 	
-	// 레이어 테스트
+	// Layer Swap Test
 	if (GetAsyncKeyState(VK_NUMPAD1))
 	{
 		steveSprite.SetDrawLayer(0);
@@ -163,6 +163,30 @@ void UpdateFrame(void)
 
 	Transform2D CameraTransform(cameraOffset, cameraAngle, 1.0f);
 	Matrix3 ViewMat = CameraTransform.GetViewMatrix();
+
+	// Axis Draw
+	Vector3 XStart(0.0f, 0.0f, 1.0f);
+	Vector3 XEnd(0.0f, 0.0f, 1.0f);
+	Vector3 YStart(0.0f, 0.0f, 1.0f);
+	Vector3 YEnd(0.0f, 0.0f, 1.0f);
+
+	XStart = XStart * ViewMat;
+	XEnd = XEnd * ViewMat;
+	YStart = YStart * ViewMat;
+	YEnd = YEnd * ViewMat;
+
+	XStart.X = (float)g_nClientWidth * -0.5f;
+	XEnd.X = (float)g_nClientWidth * 0.5f;
+	YStart.Y = (float)g_nClientHeight * -0.5f;
+	YEnd.Y = (float)g_nClientHeight * 0.5f;
+
+	SetColor(255, 0, 0);
+	DrawLine(XStart, XEnd);
+	SetColor(0, 255, 0);
+	DrawLine(YStart, YEnd);
+	
+	// Sprite Draw
+	ViewMat = CameraTransform.GetViewMatrix();
 
 	for (int i = 0; i < spritesSize; i++)
 	{
